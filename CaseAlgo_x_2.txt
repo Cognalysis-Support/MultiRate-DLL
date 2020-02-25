@@ -1,0 +1,536 @@
+****************************************************************************************
+******      Documentation of C:\Users\bret.CGCONSULT\OneDrive - Christopher Gross Consulting\CGClients\CaseStudy\CIR\2019-05-03\1-final\CaseAlgo_x_2.dll
+******      Add a reference to the DLL to your application, and use the 'Predict' function
+******      with parameters for each of the predictive variables  
+******      and as well as '_default' parameters for how to handle unmatched values:  
+******           0 - Fail -  'Predict' will not return a value if the value cannot be matched.
+******           1 - Use Null - 'Predict' will use factor corresponding the NULL value for the variable factor.
+******           2 - Use 1.0 - 'Predict' will use 1.0 for the variable factor 
+******                                                                           
+******           Note that for grouped parameters (those using ULimitLookup function), values exceeding the 
+******           highest bin upper bound will receive the factor corresponding to the highest bin
+******                                                                           
+******      Use 'True' for the final parameter to include the curve modification adjustment
+******             
+****************************************************************************************
+
+Imports Microsoft.VisualBasic 
+Imports System.Math 
+<Assembly: System.CLSCompliant(True)>
+<Assembly: System.Runtime.InteropServices.ComVisible(False)>
+<Assembly: System.Runtime.InteropServices.Guid("b237fc28-ee9f-434c-a5c6-1ccf01c9108e")>
+
+<System.Runtime.InteropServices.ComVisible(True)>
+<System.Runtime.InteropServices.Guid("6101ccd9-8501-43e1-8e75-26c290341bde")>
+<System.Runtime.InteropServices.InterfaceType(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsDual)>
+Public Interface ICaseAlgo_x_2
+
+      Function Predict([LimitRemaining] as Double,  _
+      ByVal [prevPTD] as Double?, ByVal [prevPTD_default] as Integer,  _
+      ByVal [injury_body_part] as String, ByVal [injury_body_part_default] as Integer,  _
+      ByVal [DevAge] as Double?, ByVal [DevAge_default] as Integer,  _
+      ByVal [Payroll] as Double?, ByVal [Payroll_default] as Integer,Curve_Mod As Boolean)  as Double()
+End Interface 
+
+<System.Runtime.InteropServices.ComVisible(True)>
+<System.Runtime.InteropServices.ClassInterface(System.Runtime.InteropServices.ClassInterfaceType.AutoDispatch)>
+<System.Runtime.InteropServices.Guid("d8c5dc78-9da1-4b46-bd9c-7ffc46a3f5c1")>
+   Public Class Model_CaseAlgo_x_2
+
+      Implements ICaseAlgo_x_2
+
+         Public Sub New()  
+         End Sub   
+
+         Public Function Predict([LimitRemaining] as Double,  _
+      ByVal [prevPTD] as Double?, ByVal [prevPTD_default] as Integer,  _
+      ByVal [injury_body_part] as String, ByVal [injury_body_part_default] as Integer,  _
+      ByVal [DevAge] as Double?, ByVal [DevAge_default] as Integer,  _
+      ByVal [Payroll] as Double?, ByVal [Payroll_default] as Integer,Curve_Mod As Boolean)  as Double() Implements ICaseAlgo_x_2.Predict
+
+               Dim out(6) as Double
+
+              Dim prevPTD_Factors(8)
+              Dim injury_body_part_Factors(51)
+              Dim DevAge_Factors(9)
+              Dim Payroll_Factors(9)
+              Dim prevPTD_ID(8) as Double
+              Dim injury_body_part_ID(51) as String
+              Dim DevAge_ID(9) as Double
+              Dim Payroll_ID(9) as Double
+              Dim CurveMod_ID(19) As Double
+              Dim CurveMod_Factors(19) As Double
+              
+              Initialize(prevPTD_Factors)
+              Initialize(injury_body_part_Factors)
+              Initialize(DevAge_Factors)
+              Initialize(Payroll_Factors)
+              Initialize(CurveMod_Factors)
+              
+              ' prevPTD_ID(0) is reserved for null data
+              prevPTD_ID(1) = 0
+              prevPTD_ID(2) = 710.83
+              prevPTD_ID(3) = 1603.51
+              prevPTD_ID(4) = 8704.76
+              prevPTD_ID(5) = 47305.98
+              prevPTD_ID(6) = 66478.93
+              prevPTD_ID(7) = 109840.4
+              prevPTD_ID(8) = 524950.09
+              prevPTD_Factors(0) = 1.12328938537855
+              prevPTD_Factors(1) = 0.573153355752684
+              prevPTD_Factors(2) = 0.441576218906704
+              prevPTD_Factors(3) = 0.680832491930218
+              prevPTD_Factors(4) = 1.04338252980584
+              prevPTD_Factors(5) = 1.83700284311173
+              prevPTD_Factors(6) = 2.21040058802741
+              prevPTD_Factors(7) = 2.85631308342993
+              prevPTD_Factors(8) = 3.72344329139507
+              
+              
+              ' injury_body_part_ID(0) is reserved for null data
+              injury_body_part_ID(1) = "Abdomen including Groin       "
+              injury_body_part_ID(2) = "Ankle                         "
+              injury_body_part_ID(3) = "Body System and Multiple Body "
+              injury_body_part_ID(4) = "Brain                         "
+              injury_body_part_ID(5) = "Buttocks                      "
+              injury_body_part_ID(6) = "Chest inc: Ribs Sternum       "
+              injury_body_part_ID(7) = "Disc                          "
+              injury_body_part_ID(8) = "Ear(s)                        "
+              injury_body_part_ID(9) = "Elbow                         "
+              injury_body_part_ID(10) = "Eye(s)                        "
+              injury_body_part_ID(11) = "Facial Bones                  "
+              injury_body_part_ID(12) = "Finger(s)                     "
+              injury_body_part_ID(13) = "Foot                          "
+              injury_body_part_ID(14) = "Great Toe                     "
+              injury_body_part_ID(15) = "Hand                          "
+              injury_body_part_ID(16) = "Heart                         "
+              injury_body_part_ID(17) = "Hip                           "
+              injury_body_part_ID(18) = "Insufficient Info to Properly "
+              injury_body_part_ID(19) = "Internal Organs               "
+              injury_body_part_ID(20) = "Knee                          "
+              injury_body_part_ID(21) = "Lower Arm                     "
+              injury_body_part_ID(22) = "Lower Back Lumbar Area & Lum  "
+              injury_body_part_ID(23) = "Lower Leg                     "
+              injury_body_part_ID(24) = "Lumbar and/or Sacral Vertebrae"
+              injury_body_part_ID(25) = "Lung                          "
+              injury_body_part_ID(26) = "Mouth                         "
+              injury_body_part_ID(27) = "Multiple Body Parts           "
+              injury_body_part_ID(28) = "Multiple Head Injury          "
+              injury_body_part_ID(29) = "Multiple Lower Extremeties    "
+              injury_body_part_ID(30) = "Multiple Neck Injury          "
+              injury_body_part_ID(31) = "Multiple Trunk                "
+              injury_body_part_ID(32) = "Multiple Upper Extremeties    "
+              injury_body_part_ID(33) = "No Physical Injury            "
+              injury_body_part_ID(34) = "Nose                          "
+              injury_body_part_ID(35) = "Other Facial Sort Tissue      "
+              injury_body_part_ID(36) = "Pelvis                        "
+              injury_body_part_ID(37) = "Sacrum and Coccyx             "
+              injury_body_part_ID(38) = "Shoulder(s)                   "
+              injury_body_part_ID(39) = "Skull                         "
+              injury_body_part_ID(40) = "Soft Tissue                   "
+              injury_body_part_ID(41) = "Spinal Cord                   "
+              injury_body_part_ID(42) = "Teeth                         "
+              injury_body_part_ID(43) = "Thumb                         "
+              injury_body_part_ID(44) = "Toe(s)                        "
+              injury_body_part_ID(45) = "Unknown"
+              injury_body_part_ID(46) = "Upper Arm                     "
+              injury_body_part_ID(47) = "Upper Back Area Thoracic Area "
+              injury_body_part_ID(48) = "Upper Leg                     "
+              injury_body_part_ID(49) = "Vertebrae                     "
+              injury_body_part_ID(50) = "Wrist                         "
+              injury_body_part_ID(51) = "Wrist(s) and Hand(s)          "
+              injury_body_part_Factors(0) = 1.00125737832281
+              injury_body_part_Factors(1) = 0.944911581787157
+              injury_body_part_Factors(2) = 1.05460314269852
+              injury_body_part_Factors(3) = 0.857535326057912
+              injury_body_part_Factors(4) = 1.06681264368714
+              injury_body_part_Factors(5) = 1.06780345334524
+              injury_body_part_Factors(6) = 0.916927505549616
+              injury_body_part_Factors(7) = 1.06887759689735
+              injury_body_part_Factors(8) = 0.967829027900566
+              injury_body_part_Factors(9) = 0.880363905686123
+              injury_body_part_Factors(10) = 0.655627597200203
+              injury_body_part_Factors(11) = 0.926704463308097
+              injury_body_part_Factors(12) = 0.532048038216947
+              injury_body_part_Factors(13) = 0.777929629838734
+              injury_body_part_Factors(14) = 0.92720826981088
+              injury_body_part_Factors(15) = 0.484381250442522
+              injury_body_part_Factors(16) = 0.982694893417182
+              injury_body_part_Factors(17) = 1.07477597182323
+              injury_body_part_Factors(18) = 0.988228781230223
+              injury_body_part_Factors(19) = 1.002954148031
+              injury_body_part_Factors(20) = 0.91347105285663
+              injury_body_part_Factors(21) = 0.819058451491367
+              injury_body_part_Factors(22) = 1.33271421480489
+              injury_body_part_Factors(23) = 0.948514334605798
+              injury_body_part_Factors(24) = 0.930547652086031
+              injury_body_part_Factors(25) = 1.1674718291346
+              injury_body_part_Factors(26) = 0.910173813187838
+              injury_body_part_Factors(27) = 1.08961036843783
+              injury_body_part_Factors(28) = 0.849236758309008
+              injury_body_part_Factors(29) = 1.44244734182441
+              injury_body_part_Factors(30) = 1.22892709676151
+              injury_body_part_Factors(31) = 1.34220808760329
+              injury_body_part_Factors(32) = 1.06771517739879
+              injury_body_part_Factors(33) = 0.862103113363721
+              injury_body_part_Factors(34) = 1.09920695439577
+              injury_body_part_Factors(35) = 0.803355172014641
+              injury_body_part_Factors(36) = 0.995870833488813
+              injury_body_part_Factors(37) = 0.947420122064029
+              injury_body_part_Factors(38) = 1.22918857874442
+              injury_body_part_Factors(39) = 0.777428395534804
+              injury_body_part_Factors(40) = 1.31163496966283
+              injury_body_part_Factors(41) = 0.998974163138647
+              injury_body_part_Factors(42) = 0.923914634742611
+              injury_body_part_Factors(43) = 0.616858385202227
+              injury_body_part_Factors(44) = 0.81632401529298
+              injury_body_part_Factors(45) = 0.985067253260063
+              injury_body_part_Factors(46) = 1.23451742265104
+              injury_body_part_Factors(47) = 0.928868175584961
+              injury_body_part_Factors(48) = 0.883024276102782
+              injury_body_part_Factors(49) = 1.03041735252398
+              injury_body_part_Factors(50) = 0.773931352664748
+              injury_body_part_Factors(51) = 1.03326910511435
+              
+              
+              ' DevAge_ID(0) is reserved for null data
+              DevAge_ID(1) = 1
+              DevAge_ID(2) = 2
+              DevAge_ID(3) = 3
+              DevAge_ID(4) = 4
+              DevAge_ID(5) = 5
+              DevAge_ID(6) = 6
+              DevAge_ID(7) = 8
+              DevAge_ID(8) = 12
+              DevAge_ID(9) = 35
+              DevAge_Factors(0) = 1.00010507729133
+              DevAge_Factors(1) = 1.09752238878519
+              DevAge_Factors(2) = 1.0716322394611
+              DevAge_Factors(3) = 1.04574208911886
+              DevAge_Factors(4) = 1.01985193919395
+              DevAge_Factors(5) = 0.993961789289572
+              DevAge_Factors(6) = 0.968071639448715
+              DevAge_Factors(7) = 0.942181489592175
+              DevAge_Factors(8) = 0.916291339741197
+              DevAge_Factors(9) = 0.890401189847829
+              
+              
+              ' Payroll_ID(0) is reserved for null data
+              Payroll_ID(1) = 790000
+              Payroll_ID(2) = 1405298
+              Payroll_ID(3) = 2285000
+              Payroll_ID(4) = 3573900
+              Payroll_ID(5) = 5385001
+              Payroll_ID(6) = 7831761
+              Payroll_ID(7) = 10233983
+              Payroll_ID(8) = 18425300
+              Payroll_ID(9) = 76234941
+              Payroll_Factors(0) = 0.997672612754061
+              Payroll_Factors(1) = 1.3782252590188
+              Payroll_Factors(2) = 1.2781226108077
+              Payroll_Factors(3) = 1.17801996286951
+              Payroll_Factors(4) = 1.07791731460754
+              Payroll_Factors(5) = 0.977814666524439
+              Payroll_Factors(6) = 0.877712018746729
+              Payroll_Factors(7) = 0.777609370772142
+              Payroll_Factors(8) = 0.677506722616224
+              Payroll_Factors(9) = 0.577404074741654
+              
+              
+              CurveMod_ID(0) = 0.000474622677736654
+              CurveMod_ID(1) = 0.000670077533572799
+              CurveMod_ID(2) = 0.000808643394016934
+              CurveMod_ID(3) = 0.000917215823186902
+              CurveMod_ID(4) = 0.00100987765424823
+              CurveMod_ID(5) = 0.00110916261903952
+              CurveMod_ID(6) = 0.00120725400789522
+              CurveMod_ID(7) = 0.00131904151138253
+              CurveMod_ID(8) = 0.0014428907412164
+              CurveMod_ID(9) = 0.00158262662143217
+              CurveMod_ID(10) = 0.0017154144821782
+              CurveMod_ID(11) = 0.00188434651083907
+              CurveMod_ID(12) = 0.00207552255906354
+              CurveMod_ID(13) = 0.00230828008872825
+              CurveMod_ID(14) = 0.0026071872964861
+              CurveMod_ID(15) = 0.00306939414195971
+              CurveMod_ID(16) = 0.0038366619462498
+              CurveMod_ID(17) = 0.0048826706022462
+              CurveMod_ID(18) = 0.00638382514636641
+              CurveMod_ID(19) = 0.00986023377034431
+              
+              CurveMod_Factors(0) = 0.657840857057552
+              CurveMod_Factors(1) = 0.598916901594818
+              CurveMod_Factors(2) = 0.63063388918527
+              CurveMod_Factors(3) = 0.642199836683044
+              CurveMod_Factors(4) = 0.6979780097072
+              CurveMod_Factors(5) = 0.763590445212895
+              CurveMod_Factors(6) = 0.780315176799658
+              CurveMod_Factors(7) = 0.813399595314911
+              CurveMod_Factors(8) = 0.822174818637664
+              CurveMod_Factors(9) = 0.827691012109075
+              CurveMod_Factors(10) = 0.849528438779963
+              CurveMod_Factors(11) = 0.892800570399535
+              CurveMod_Factors(12) = 0.93433821463799
+              CurveMod_Factors(13) = 0.992735589303505
+              CurveMod_Factors(14) = 1.00872140711
+              CurveMod_Factors(15) = 1.02798171168719
+              CurveMod_Factors(16) = 1.04898992758001
+              CurveMod_Factors(17) = 1.07345885005477
+              CurveMod_Factors(18) = 1.10861294640138
+              CurveMod_Factors(19) = 1.19813992552794
+              
+              Dim Exposure = LimitRemaining
+              Dim BaseFactor = 0.00253364605762881
+              out(1) = 0.00253364605762881
+              Dim CurveModFactor As Double = 1
+              Dim failure As Boolean = "False"
+              
+              Dim prevPTDFactor 
+              
+              If [prevPTD] Is Nothing then 
+                 prevPTDFactor =prevPTD_Factors(0)
+              Else
+                 Try
+                       prevPTDFactor = prevPTD_Factors(ULimitLookup([prevPTD],prevPTD_ID,1,ubound(prevPTD_ID)))
+                 Catch
+                    Select Case [prevPTD_default]
+                      Case 0
+                         failure = "True"
+                         prevPTDFactor = -1
+                      Case 1
+                         prevPTDFactor =prevPTD_Factors(0)
+                      Case 2
+                         prevPTDFactor = 1
+                    End Select
+                 End Try
+              
+              End If
+              out(2) = prevPTDFactor
+              
+              Dim injury_body_partFactor 
+              
+              If [injury_body_part] Is Nothing then 
+                 injury_body_partFactor =injury_body_part_Factors(0)
+              Else
+                 Try
+                    injury_body_partFactor = injury_body_part_Factors(ExactLookup([injury_body_part],injury_body_part_ID))
+                 Catch
+                    Select Case [injury_body_part_default]
+                      Case 0
+                         failure = "True"
+                         injury_body_partFactor = -1
+                      Case 1
+                         injury_body_partFactor =injury_body_part_Factors(0)
+                      Case 2
+                         injury_body_partFactor = 1
+                    End Select
+                 End Try
+              
+              End If
+              out(3) = injury_body_partFactor
+              
+              Dim DevAgeFactor 
+              
+              If [DevAge] Is Nothing then 
+                 DevAgeFactor =DevAge_Factors(0)
+              Else
+                 Try
+                       DevAgeFactor = DevAge_Factors(ULimitLookup([DevAge],DevAge_ID,1,ubound(DevAge_ID)))
+                 Catch
+                    Select Case [DevAge_default]
+                      Case 0
+                         failure = "True"
+                         DevAgeFactor = -1
+                      Case 1
+                         DevAgeFactor =DevAge_Factors(0)
+                      Case 2
+                         DevAgeFactor = 1
+                    End Select
+                 End Try
+              
+              End If
+              out(4) = DevAgeFactor
+              
+              Dim PayrollFactor 
+              
+              If [Payroll] Is Nothing then 
+                 PayrollFactor =Payroll_Factors(0)
+              Else
+                 Try
+                       PayrollFactor = Payroll_Factors(ULimitLookup([Payroll],Payroll_ID,1,ubound(Payroll_ID)))
+                 Catch
+                    Select Case [Payroll_default]
+                      Case 0
+                         failure = "True"
+                         PayrollFactor = -1
+                      Case 1
+                         PayrollFactor =Payroll_Factors(0)
+                      Case 2
+                         PayrollFactor = 1
+                    End Select
+                 End Try
+              
+              End If
+              out(5) = PayrollFactor
+              
+              If Curve_Mod and (not failure) then
+                 Dim lower As Double
+                 Dim higher As Double
+                 Dim weight_lower As Double
+                 Dim weight_higher As Double
+                 Dim curveIndex = ULimitLookup(BaseFactor*prevPTDFactor*injury_body_partFactor*DevAgeFactor*PayrollFactor,CurveMod_ID,0,ubound(CurveMod_ID))
+              
+                 If curveIndex=0 then
+                    CurveModFactor = CurveMod_Factors(0)
+                 Elseif BaseFactor*prevPTDFactor*injury_body_partFactor*DevAgeFactor*PayrollFactor>CurveMod_ID(ubound(CurveMod_ID)) Then
+                    CurveModFactor = CurveMod_Factors(ubound(CurveMod_ID))
+                 Else
+                    higher =CurveMod_ID(curveIndex)
+                    lower =CurveMod_ID(curveIndex-1)
+                    weight_higher =CurveMod_Factors(curveIndex)
+                    weight_lower =CurveMod_Factors(curveIndex-1)
+                    CurveModFactor = WeightedAverage(BaseFactor*prevPTDFactor*injury_body_partFactor*DevAgeFactor*PayrollFactor,lower,higher,weight_lower,weight_higher)
+                 End if
+              
+                 out(6) = CurveModFactor
+              End if
+              
+              If failure then
+                 out(0) = -1
+              Else
+                 out(0) = Exposure*BaseFactor*CurveModFactor*prevPTDFactor*injury_body_partFactor*DevAgeFactor*PayrollFactor
+              End If
+              
+              Return out
+         End Function
+   End Class
+
+   Module OtherCalc
+      Function WeightedAverage(value, lower, higher, weight_lower, weight_higher)
+         Return weight_lower * (higher - value) / (higher - lower) + weight_higher * (value - lower) / (higher - lower)
+      End Function
+      
+
+      Sub Initialize(ByRef matrix)
+         Dim i as Integer
+         Dim j as Integer
+         Dim k as Integer
+         Dim l as Integer
+      
+         Select Case matrix.rank
+            Case 1
+               For i = 0 to UBound(matrix,1)
+                  matrix(i) = 1
+               Next
+            Case 2
+               For i = 0 to UBound(matrix,1)
+                  For j = 0 to UBound(matrix,2)
+                     matrix(i,j) = 1
+                  Next
+               Next
+            Case 3
+               For i = 0 to UBound(matrix,1)
+                  For j = 0 to UBound(matrix,2)
+                     For k = 0 to UBound(matrix,3)
+                        matrix(i,j,k) = 1
+                     Next
+                  Next
+               Next
+            Case 4
+               For i = 0 to UBound(matrix,1)
+                  For j = 0 to UBound(matrix,2)
+                     For k = 0 to UBound(matrix,3)
+                        For l = 0 to UBound(matrix,3)
+                           matrix(i,j,k,l) = 1
+                        Next
+                     Next
+                  Next
+               Next
+            End Select
+      End Sub
+      
+
+      Function ExactLookup(value, vector, Optional searchgroup = Nothing)
+         Dim i as Integer
+      
+         If searchgroup Is Nothing Then
+            Dim sg(-1) As Boolean
+            searchgroup = sg
+         End If
+      
+         Dim ubnd As Integer = UBound(vector, 1)
+         Dim startGroup, endGroup As Integer
+      
+         startGroup = 0
+         endGroup = ubnd
+         Dim half As Integer
+      
+         For i = 0 To UBound(searchgroup)
+            half = System.Math.Truncate((endGroup - startGroup) / 2)
+            Select Case searchgroup(i)
+               Case True
+                  startGroup = startGroup + half + 1
+                  endGroup = endGroup
+               Case False
+                  startGroup = startGroup
+                  endGroup = startGroup + half - 1
+            End Select
+         Next
+      
+         half = System.Math.Truncate((endGroup - startGroup) / 2)
+         Dim trial = vector(startGroup + half)
+      
+         Select Case Compare(value,trial)
+            case 0 : Return startGroup + half
+            case -1
+               If half > 0 Then
+                  ReDim Preserve searchgroup(UBound(searchgroup) + 1)
+                  searchgroup(UBound(searchgroup)) = False
+                  Return ExactLookup(value, vector, searchgroup)
+               Else
+                  Return -1
+               End If
+            case else
+               ReDim Preserve searchgroup(UBound(searchgroup) + 1)
+               searchgroup(UBound(searchgroup)) = True
+               Return ExactLookup(value, vector, searchgroup)
+         End Select
+      End Function
+      
+
+      Function UlimitLookup(value, vector, starting, ending)
+         Dim half = System.Math.Floor((ending-starting)/2)+starting
+      
+         If Compare(starting,ending) = 0 then 
+            Return starting
+         End If
+      
+         If compare(value,vector(ending)) = 1 then
+            Return ending
+         End If
+      
+         If compare(value,vector(half)) < 1 then
+            Return UlimitLookup(value, vector, starting, half)
+         Else
+            Return UlimitLookup(value, vector, half+1, ending)
+         End If
+      End Function
+      
+
+      Function Compare(a, b)
+         If TypeOf (a) Is String Then
+             Return String.Compare(a, b, True)
+         Else
+            Select Case a
+               Case <b : Return -1
+               Case =b : Return 0
+               Case Else : Return 1
+            End Select
+         End If
+      End Function
+      
+
+   End Module
+
+
+
